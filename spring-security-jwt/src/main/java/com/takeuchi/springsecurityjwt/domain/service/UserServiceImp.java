@@ -30,6 +30,19 @@ public class UserServiceImp implements UserService {
 	}
 
 	@Override
+	public User updateMe() {
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
+	}
+
+	@Override
+	public User deleteMe() {
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
+	}
+
+
+	@Override
 	@Transactional(readOnly = true)
 	public User findById(Integer id) {
 
@@ -89,7 +102,4 @@ public class UserServiceImp implements UserService {
 
 		userRepository.deleteById(id);;
 	}
-
-
-
 }
