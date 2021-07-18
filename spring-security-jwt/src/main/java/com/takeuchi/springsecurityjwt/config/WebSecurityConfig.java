@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.takeuchi.springsecurityjwt.common.CommonConstants;
 import com.takeuchi.springsecurityjwt.security.JWTAuthenticationFilter;
+import com.takeuchi.springsecurityjwt.security.JWTAuthorizationFilter;
 
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -51,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				//requestを認証しtokenを発行するfilter
 				.addFilter(new JWTAuthenticationFilter(authenticationManager()))
 				//tokenの承認を行うfilter
-//					.addFilter(null)
+				.addFilterAfter(new JWTAuthorizationFilter(), JWTAuthenticationFilter.class)
 			//h2-consoleへ接続するための設定
 			.headers().frameOptions().disable();
 	}
