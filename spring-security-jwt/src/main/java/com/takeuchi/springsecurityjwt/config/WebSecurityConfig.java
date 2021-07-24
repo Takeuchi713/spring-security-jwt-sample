@@ -9,6 +9,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.takeuchi.springsecurityjwt.common.CommonConstants;
+import com.takeuchi.springsecurityjwt.security.JWTAccessDeniedHandler;
+import com.takeuchi.springsecurityjwt.security.JWTAuthenticationEntryPoint;
 import com.takeuchi.springsecurityjwt.security.JWTAuthenticationFilter;
 import com.takeuchi.springsecurityjwt.security.JWTAuthorizationFilter;
 
@@ -18,7 +20,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring()
-			.antMatchers("/css/**", "/js/**", "/images/**")
 			//swaggerが認証エラーとならない為の設定
 			.antMatchers("/v2/api-docs",
 				"/configuration/ui",
@@ -53,12 +54,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.addFilter(new JWTAuthenticationFilter(authenticationManager()))
 				//tokenの承認を行うfilter
 				.addFilterAfter(new JWTAuthorizationFilter(), JWTAuthenticationFilter.class)
+			//エラーハンドリング
+			.exceptionHandling()
+				// ログインエラー時のハンドラー設定(未ログインでAPI実行時のエラーも)
+				.accessDeniedHandler(new JWTAccessDeniedHandler())
+				// 権限エラー時のハンドラー設定
+				.authenticationEntryPoint(new JWTAuthenticationEntryPoint())
+			.and()
 			//h2-consoleへ接続するための設定
 			.headers().frameOptions().disable();
 	}
 
 	@Bean
-	//beanに登録しておけば、login認証時にspring-securityが自動的に使用してくれる。
+	//password encoder
 	public BCryptPasswordEncoder bCryptPasswordEncoder () {
 		return new BCryptPasswordEncoder(10);
 	}

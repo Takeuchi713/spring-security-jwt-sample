@@ -26,7 +26,7 @@ public class UserDetailsServiceImp implements UserDetailsService {
 		log.info("user {} was accessed", email);
 
 		return userRepository.findByEmail(email)
-				.map(LoginUser::new)
-				.orElseThrow(() -> new UsernameNotFoundException("User [" + email + "] was not found"));
+			.map(LoginUser::new)
+			.orElseThrow(() -> new UsernameNotFoundException("User [" + email + "] was not found"));
 	}
 }

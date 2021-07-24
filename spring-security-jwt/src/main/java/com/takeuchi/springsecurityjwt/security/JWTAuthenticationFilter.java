@@ -21,21 +21,19 @@ import com.takeuchi.springsecurityjwt.domain.model.dto.LoginRequest;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 /*
  * UsernamePasswordAuthenticationFilterはデフォルトでは
- * /loginへPOSTされると username,passwordのKeyででログイン認証を行う。
+ * /loginへPOSTされると username,passwordのKeyでログイン認証を行う。
  */
+@Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
-//	private final PasswordEncoder passwordEncoder;
-
 
 	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
-
 		this.authenticationManager = authenticationManager;
-//		this.passwordEncoder = passwordEncoder;
 
 		//デフォルトのpathを変更
 		setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(CommonConstants.LOGIN_URL, "POST"));
@@ -54,15 +52,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
 
 			Authentication authentication = new UsernamePasswordAuthenticationToken(
-					loginRequest.getEmail(), //principal
-					loginRequest.getPassword() //credencial
+				loginRequest.getEmail(), //principal
+				loginRequest.getPassword() //credencial
 			);
 
 			//リクエストの検証結果を返す
 			return authenticationManager.authenticate(authentication);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.warn(e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}

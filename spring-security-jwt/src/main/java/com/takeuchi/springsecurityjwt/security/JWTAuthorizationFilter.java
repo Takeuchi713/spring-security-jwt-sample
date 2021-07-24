@@ -36,9 +36,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter   {
 			throws ServletException, IOException {
 
 		String header = request.getHeader(CommonConstants.AUTHORIZED_HEADER);
-
 		if(!StringUtils.hasText(header) || !header.startsWith(CommonConstants.TOKEN_PREFIX) ) {
-			//publicに指定している物もここに入る。
 			log.info("request {} was called by token {}", request.getRequestURI(), header);
 			filterChain.doFilter(request, response);
 			return;
@@ -46,18 +44,17 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter   {
 
 		String token = header.replace(CommonConstants.TOKEN_PREFIX, "");
 		if(token != null) {
-
 			try {
-				//tokenを複合し中身を取得。有効期限に問題があるとここで例外が発生する。
+				//tokenを復号し中身を取得。不正があるとJwtExceptionが発生する。
 				Jws<Claims> claimsJws = Jwts.parserBuilder()
 					.setSigningKey(Keys.hmacShaKeyFor(CommonConstants.SECRET_KEY.getBytes()))
 					.build()
 					.parseClaimsJws(token);
 
-				//tokenの内容から認証情報を作成する。
+				//復号tokenから認証情報を作成する。
 				Authentication authentication = getAuthentication(claimsJws);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
-        filterChain.doFilter(request, response);
+				filterChain.doFilter(request, response);
 			}catch(JwtException je) {
 				log.error(je.getMessage());
 				throw new IllegalStateException(String.format("Token %s cannnot be trusted ", token));
