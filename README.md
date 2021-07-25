@@ -1,5 +1,5 @@
 # spring-security-jwt-sample
-Spring Security × JWTによるREST APIの認証でもアプリケーション
+Spring Security × JWTによるREST APIの認証デモアプリケーション  
 ユーザの権限別にAPI呼び出しを制限
 
 |メソッド| パス                       | 権限  | 備考 |
