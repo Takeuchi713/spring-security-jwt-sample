@@ -10,12 +10,25 @@ import com.takeuchi.springsecurityjwt.domain.model.entity.User;
 @Service
 public interface UserService {
 
-	/*
-	 * tokenから判定した自分の情報を取得
+	/**
+	 * 自分の情報を取得
 	 */
 	public User findMe();
+	
+	/**
+	 * 自分の情報を更新
+	 * @param userRequest
+	 * @return
+	 */
+	public User updateMe(UserRequest userRequest);
 
-	/*
+	/**
+	 * 自分の情報を削除
+	 * @return
+	 */
+	public void deleteMe();
+
+	/**
 	 * idに紐づくUser情報を取得
 	 */
 	public User findById(Integer id);
@@ -39,7 +52,7 @@ public interface UserService {
 	 */
 	public void updateUser(UserRequest userRequest);
 
-	/*
+	/**
 	 * idに紐づくUserを削除
 	 */
 	public void deleteUserById(Integer id);

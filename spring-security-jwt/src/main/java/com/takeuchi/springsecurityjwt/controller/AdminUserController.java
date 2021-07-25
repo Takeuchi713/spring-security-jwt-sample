@@ -17,12 +17,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.takeuchi.springsecurityjwt.common.CommonConstants;
 import com.takeuchi.springsecurityjwt.domain.model.dto.UserRequest;
 import com.takeuchi.springsecurityjwt.domain.model.entity.User;
 import com.takeuchi.springsecurityjwt.domain.service.UserService;
 
 @RestController
-@RequestMapping("/api/v1/" + "admin")
+@RequestMapping(CommonConstants.API_BASE_PATH  + "/admin")
 public class AdminUserController {
 
 	private final UserService userService;
