@@ -54,6 +54,11 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter   {
 				//復号tokenから認証情報を作成する。
 				Authentication authentication = getAuthentication(claimsJws);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
+				
+				//ユーザidを追加
+				if(claimsJws.getBody().getSubject() != null) {
+					request.setAttribute(CommonConstants.USER_ID, claimsJws.getBody().getSubject());
+				}
 				filterChain.doFilter(request, response);
 			}catch(JwtException je) {
 				log.error(je.getMessage());

@@ -3,6 +3,8 @@ package com.takeuchi.springsecurityjwt.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.ValidationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,6 +34,25 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
 		Map<String, Object> errorMap = new HashMap<>();
 		errorMap.put("errcd", HttpStatus.BAD_REQUEST.value());
 		errorMap.put("message", "user was not found");
+
+		return errorMap;
+	}
+	
+	/**
+	 * status 400
+	 *
+	 * @param exception リクエスト不正
+	 * @return
+	 */
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(ValidationException.class)
+	public Map<String, Object> validationException(ValidationException ex) {
+		log.warn(ex.getMessage());
+		ex.printStackTrace();
+
+		Map<String, Object> errorMap = new HashMap<>();
+		errorMap.put("errcd", HttpStatus.BAD_REQUEST.value());
+		errorMap.put("message", "bad request");
 
 		return errorMap;
 	}

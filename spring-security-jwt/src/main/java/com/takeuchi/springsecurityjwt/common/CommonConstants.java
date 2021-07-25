@@ -17,5 +17,7 @@ public class CommonConstants {
 	public static final String AUTHORIZED_HEADER = "X-Authenticated-token";
 
 	public static final String TOKEN_PREFIX = "Bearer ";
+	
+	public static final String USER_ID = "id";
 
 }

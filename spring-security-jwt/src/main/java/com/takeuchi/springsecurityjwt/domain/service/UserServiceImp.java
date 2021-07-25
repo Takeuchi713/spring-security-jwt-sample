@@ -2,12 +2,15 @@ package com.takeuchi.springsecurityjwt.domain.service;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.takeuchi.springsecurityjwt.common.CommonConstants;
 import com.takeuchi.springsecurityjwt.common.exception.UserNotFoundException;
 import com.takeuchi.springsecurityjwt.domain.model.dto.UserRequest;
 import com.takeuchi.springsecurityjwt.domain.model.entity.User;
@@ -17,37 +20,64 @@ import com.takeuchi.springsecurityjwt.domain.repository.UserRepository;
 public class UserServiceImp implements UserService {
 
 	private final UserRepository userRepository;
+	private final HttpServletRequest servletRequest;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Autowired
-	UserServiceImp(UserRepository userRepository) {
+	UserServiceImp(UserRepository userRepository, HttpServletRequest servletRequest,
+			BCryptPasswordEncoder bCryptPasswordEncoder) {
 		this.userRepository = userRepository;
+		this.servletRequest = servletRequest;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public User findMe() {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+		// filterで追加したidを取得
+		Integer id = getId();
+		if(id == null) {
+			throw new UserNotFoundException("no id");
+		}
+		return userRepository.findById(id)
+			.orElseThrow(() -> new UserNotFoundException("user with id: " + id + "was not found"));
 	}
 
 	@Override
-	public User updateMe() {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+	@Transactional
+	public User updateMe(UserRequest userRequest) {
+		Integer id = getId();
+		if(id == null) {
+			throw new UserNotFoundException("no id");
+		}
+		User updateUser = userRepository.findById(id)
+			.orElseThrow(() -> new UserNotFoundException("\"user with id: \" + id + \"was not found\""));
+		
+		updateUser.setEmail(userRequest.getEmail());
+		updateUser.setName(userRequest.getName());
+		updateUser.setRoles(userRequest.getRoles());
+		updateUser.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
+		updateUser.setActive(userRequest.getIs_active());
+		userRepository.save(updateUser);
+		return updateUser;
 	}
 
 	@Override
-	public User deleteMe() {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+	@Transactional
+	public void deleteMe() {
+		Integer id = getId();
+		if (id == null || userRepository.findById(id).get() == null) {
+			throw new UserNotFoundException("no user was found");
+		}
+		userRepository.deleteById(id);
 	}
 
 
 	@Override
 	@Transactional(readOnly = true)
 	public User findById(Integer id) {
-
 		User user = userRepository.findById(id)
-				.orElseThrow(() -> new UserNotFoundException("user with id: " + id + "was not found"));
+			.orElseThrow(() -> new UserNotFoundException("user with id: " + id + "was not found"));
 		return user;
 	}
 
@@ -65,11 +95,9 @@ public class UserServiceImp implements UserService {
 		newUser.setName(userRequest.getName());
 		newUser.setEmail(userRequest.getEmail());
 		newUser.setRoles(userRequest.getRoles());
-		newUser.setPassword(userRequest.getPassword());//TODO 暗号化
+		newUser.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
 		newUser.setActive(userRequest.getIs_active());
-
 		User user = userRepository.save(newUser);
-
 		return user;
 	}
 
@@ -85,9 +113,8 @@ public class UserServiceImp implements UserService {
 		updateUser.setEmail(userRequest.getEmail());
 		updateUser.setName(userRequest.getName());
 		updateUser.setRoles(userRequest.getRoles());
-		updateUser.setPassword(userRequest.getPassword()); //TODO 暗号化
+		updateUser.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
 		updateUser.setActive(userRequest.getIs_active());
-
 		userRepository.save(updateUser);
 	}
 
@@ -99,7 +126,18 @@ public class UserServiceImp implements UserService {
 		}
 		userRepository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException("user by id: " + id + " was not found"));
-
 		userRepository.deleteById(id);;
+	}
+	
+	
+	private Integer getId() {
+		Integer id = null;
+		try {
+			String idStr = (String) servletRequest.getAttribute(CommonConstants.USER_ID);
+			id = Integer.valueOf(idStr);
+		}catch(Exception e) {
+			return id;
+		}
+		return id;
 	}
 }
